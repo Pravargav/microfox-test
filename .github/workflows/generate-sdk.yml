@@ -68,4 +68,5 @@ jobs:
             git push origin HEAD:${{ github.event.pull_request.head.ref }}
           else
             echo "No SDK files to commit"
+          fi
         
