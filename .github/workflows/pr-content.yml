@@ -1,0 +1,72 @@
+# .github/workflows/pr-content.yml
+name: Print Pull Request Content
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  print-pr-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Fetch the full history to compare branches
+          fetch-depth: 0
+          
+      - name: Print Pull Request Information
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: |
+          echo "=== PULL REQUEST INFORMATION ==="
+          echo "PR Number: $PR_NUMBER"
+          echo "Title: $PR_TITLE"
+          echo "Author: $PR_AUTHOR"
+          echo "Base Branch: $PR_BASE_BRANCH"
+          echo "Head Branch: $PR_HEAD_BRANCH"
+          echo "URL: $PR_URL"
+          echo ""
+          echo "=== PULL REQUEST DESCRIPTION ==="
+          echo "$PR_BODY"
+          echo ""
+          
+      - name: Get Changed Files
+        run: |
+          echo "=== CHANGED FILES ==="
+          git diff --name-only origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}
+          echo ""
+          
+      - name: Show File Changes (Diff)
+        run: |
+          echo "=== FILE CHANGES DIFF ==="
+          git diff origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}
+          echo ""
+          
+      - name: Count Lines Changed
+        run: |
+          echo "=== STATISTICS ==="
+          ADDED=$(git diff --numstat origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }} | awk '{added += $1} END {print added}')
+          DELETED=$(git diff --numstat origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }} | awk '{deleted += $2} END {print deleted}')
+          FILES=$(git diff --name-only origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }} | wc -l)
+          
+          echo "Files changed: $FILES"
+          echo "Lines added: $ADDED"
+          echo "Lines deleted: $DELETED"
+          
+      - name: Print PR Labels and Assignees
+        run: |
+          echo "=== LABELS ==="
+          echo '${{ toJson(github.event.pull_request.labels) }}' | jq -r '.[].name' || echo "No labels"
+          echo ""
+          echo "=== ASSIGNEES ==="
+          echo '${{ toJson(github.event.pull_request.assignees) }}' | jq -r '.[].login' || echo "No assignees"
