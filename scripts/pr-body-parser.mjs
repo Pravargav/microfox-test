@@ -5,8 +5,12 @@
  * This script extracts and prints the pull request body and metadata
  */
 
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function main() {
     console.log('🚀 PR Body Parser Script Started');
@@ -41,9 +45,9 @@ function main() {
     console.log('=====================');
     
     // Optional: Save PR body to a file for other scripts to use
-    const outputDir = join(process.cwd(), 'temp');
-    if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
+    const outputDir = path.join(process.cwd(), 'temp');
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
     }
     
     const prData = {
@@ -54,8 +58,8 @@ function main() {
         timestamp: new Date().toISOString()
     };
     
-    const outputFile = join(outputDir, 'pr-data.json');
-    writeFileSync(outputFile, JSON.stringify(prData, null, 2));
+    const outputFile = path.join(outputDir, 'pr-data.json');
+    fs.writeFileSync(outputFile, JSON.stringify(prData, null, 2));
     console.log(`💾 PR data saved to: ${outputFile}`);
     
     // Extract checklist items if present
@@ -130,9 +134,9 @@ process.on('unhandledRejection', (reason, promise) => {
     process.exit(1);
 });
 
-// Run the main function
-if (require.main === module) {
+// Run the main function - ES module way to detect if this file is being run directly
+if (import.meta.url === `file://${process.argv[1]}`) {
     main();
 }
 
-export default { main, formatPRBody, extractChecklist, extractIssueReferences };
+export { main, formatPRBody, extractChecklist, extractIssueReferences };
