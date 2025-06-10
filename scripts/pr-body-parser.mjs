@@ -3,6 +3,7 @@
 /**
  * PR Body Parser Script
  * This script extracts and prints the pull request body and metadata
+ * Also creates a markdown file in the markfiles folder
  */
 
 import fs from 'fs';
@@ -72,6 +73,22 @@ function main() {
     extractIssueReferences(prBody);
     
     console.log('✅ PR Body Parser Script Completed');
+}
+
+function formatPRBody(body) {
+    // Replace common markdown elements for better console display
+    let formatted = body
+        .replace(/###\s*/g, '🔸 ')
+        .replace(/##\s*/g, '🔹 ')
+        .replace(/#\s*/g, '🔶 ')
+        .replace(/\*\*(.*?)\*\*/g, '🔥 $1')
+        .replace(/\*(.*?)\*/g, '✨ $1')
+        .replace(/`(.*?)`/g, '💻 $1')
+        .replace(/```[\s\S]*?```/g, '[CODE BLOCK]')
+        .replace(/\[(x|X)\]/g, '✅')
+        .replace(/\[ \]/g, '☐');
+    
+    return formatted;
 }
 
 function createMarkdownFile(prData) {
@@ -154,6 +171,20 @@ ${generateSummary(body)}
     return markdownContent;
 }
 
+function extractChecklist(body) {
+    const checklistItems = body.match(/- \[(x|X| )\] .+/g);
+    
+    if (checklistItems && checklistItems.length > 0) {
+        console.log('📋 Checklist Items Found:');
+        checklistItems.forEach((item, index) => {
+            const isChecked = item.includes('[x]') || item.includes('[X]');
+            const itemText = item.replace(/- \[(x|X| )\] /, '');
+            console.log(`   ${index + 1}. ${isChecked ? '✅' : '☐'} ${itemText}`);
+        });
+        console.log('');
+    }
+}
+
 function extractChecklistForMarkdown(body) {
     const checklistItems = body.match(/- \[(x|X| )\] .+/g);
     
@@ -169,6 +200,28 @@ function extractChecklistForMarkdown(body) {
     });
     
     return checklistMd;
+}
+
+function extractIssueReferences(body) {
+    const issueRefs = body.match(/#\d+/g);
+    const fixesRefs = body.match(/(?:fixes|closes|resolves)\s+#\d+/gi);
+    
+    if (issueRefs && issueRefs.length > 0) {
+        console.log('🔗 Issue References Found:');
+        const uniqueRefs = [...new Set(issueRefs)];
+        uniqueRefs.forEach(ref => {
+            console.log(`   ${ref}`);
+        });
+        console.log('');
+    }
+    
+    if (fixesRefs && fixesRefs.length > 0) {
+        console.log('🔧 Issues to be Fixed/Closed:');
+        fixesRefs.forEach(ref => {
+            console.log(`   ${ref}`);
+        });
+        console.log('');
+    }
 }
 
 function extractIssueReferencesForMarkdown(body) {
@@ -218,59 +271,6 @@ function generateSummary(body) {
 - **Contains Images:** ${hasImages ? 'Yes' : 'No'}
 - **Contains Links:** ${hasLinks ? 'Yes' : 'No'}
 `;
-}
-}
-
-function formatPRBody(body) {
-    // Replace common markdown elements for better console display
-    let formatted = body
-        .replace(/###\s*/g, '🔸 ')
-        .replace(/##\s*/g, '🔹 ')
-        .replace(/#\s*/g, '🔶 ')
-        .replace(/\*\*(.*?)\*\*/g, '🔥 $1')
-        .replace(/\*(.*?)\*/g, '✨ $1')
-        .replace(/`(.*?)`/g, '💻 $1')
-        .replace(/```[\s\S]*?```/g, '[CODE BLOCK]')
-        .replace(/\[(x|X)\]/g, '✅')
-        .replace(/\[ \]/g, '☐');
-    
-    return formatted;
-}
-
-function extractChecklist(body) {
-    const checklistItems = body.match(/- \[(x|X| )\] .+/g);
-    
-    if (checklistItems && checklistItems.length > 0) {
-        console.log('📋 Checklist Items Found:');
-        checklistItems.forEach((item, index) => {
-            const isChecked = item.includes('[x]') || item.includes('[X]');
-            const itemText = item.replace(/- \[(x|X| )\] /, '');
-            console.log(`   ${index + 1}. ${isChecked ? '✅' : '☐'} ${itemText}`);
-        });
-        console.log('');
-    }
-}
-
-function extractIssueReferences(body) {
-    const issueRefs = body.match(/#\d+/g);
-    const fixesRefs = body.match(/(?:fixes|closes|resolves)\s+#\d+/gi);
-    
-    if (issueRefs && issueRefs.length > 0) {
-        console.log('🔗 Issue References Found:');
-        const uniqueRefs = [...new Set(issueRefs)];
-        uniqueRefs.forEach(ref => {
-            console.log(`   ${ref}`);
-        });
-        console.log('');
-    }
-    
-    if (fixesRefs && fixesRefs.length > 0) {
-        console.log('🔧 Issues to be Fixed/Closed:');
-        fixesRefs.forEach(ref => {
-            console.log(`   ${ref}`);
-        });
-        console.log('');
-    }
 }
 
 // Handle errors gracefully
