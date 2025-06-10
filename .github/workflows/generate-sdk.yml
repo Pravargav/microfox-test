@@ -53,3 +53,19 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: node scripts/generate-sdk.js
+
+# ... previous steps ...
+
+      - name: Commit generated SDK
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if there are any changes to commit
+          if [[ -n $(git status --porcelain) ]]; then
+            git add sdks/
+            git commit -m "🤖 Auto-generate SDK for PR #${{ github.event.pull_request.number }}"
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+          else
+            echo "No SDK files to commit"
+        
