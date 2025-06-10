@@ -73,5 +73,5 @@ jobs:
             echo "No changes to commit"
           else
             git commit -m "Add PR #${{ github.event.pull_request.number }} markdown file"
-            git push
+            git push origin HEAD:${{ github.event.pull_request.head.ref }}
           fi
