@@ -24,10 +24,10 @@ jobs:
         run: npm ci
 
       - name: Make scripts executable
-        run: chmod +x scripts/*.js
+        run: chmod +x scripts/*.mjs
 
       - name: Run PR body script
-        run: node scripts/pr-body-parser.js
+        run: node scripts/pr-body-parser.mjs
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
@@ -36,7 +36,7 @@ jobs:
 
       - name: Run all scripts in scripts folder
         run: |
-          for script in scripts/*.js; do
+          for script in scripts/*.mjs; do
             if [ -f "$script" ]; then
               echo "Running $script..."
               node "$script"
