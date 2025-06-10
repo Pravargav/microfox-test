@@ -32,7 +32,24 @@ jobs:
           mkdir -p sdks
           mkdir -p scripts
       
-      - name: Test directories
+      - name: Create dummy generate-sdk.js (temporary)
         run: |
-          echo "Directories created successfully!"
-          ls -la
+          cat > scripts/generate-sdk.js << 'EOF'
+          console.log("PR Body:", process.env.PR_BODY);
+          console.log("PR Number:", process.env.PR_NUMBER);
+          console.log("Generating SDK...");
+          
+          // Create a dummy SDK file for testing
+          const fs = require('fs');
+          fs.writeFileSync('sdks/test-sdk.js', 'console.log("Generated SDK!");');
+          console.log("SDK generated successfully!");
+          EOF
+      
+      - name: Generate SDK
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: node scripts/generate-sdk.js
