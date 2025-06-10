@@ -13,8 +13,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.head_ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -74,8 +72,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Add PR #${{ github.event.pull_request.number }} markdown file [skip ci]"
-            git push origin HEAD:${{ github.head_ref }}
+            git commit -m "Add PR #${{ github.event.pull_request.number }} markdown file"
+            git push
           fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
