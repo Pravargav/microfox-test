@@ -34,7 +34,7 @@ jobs:
           npm init -y 2>/dev/null || true
           npm install axios dotenv
       
-      - name: Create sdks directory
+      - name: Create directories
         run: |
           mkdir -p sdks
           mkdir -p scripts
@@ -68,32 +68,42 @@ jobs:
           script: |
             const fs = require('fs');
             
-            // Check if SDK was generated
-            const sdkFiles = fs.readdirSync('sdks').filter(f => f.endsWith('.js') || f.endsWith('.ts'));
-            
-            if (sdkFiles.length > 0) {
-              const comment = `🎉 **SDK Generated Successfully!**
+            try {
+              // Check if SDK was generated
+              const sdkFiles = fs.readdirSync('sdks').filter(f => f.endsWith('.js') || f.endsWith('.ts'));
               
-              Generated SDK files:
-              ${sdkFiles.map(file => `- \`sdks/${file}\``).join('\n')}
-              
-              The SDK has been automatically committed to this branch.
-              
-              **Usage Example:**
-              \`\`\`javascript
-              const sdk = require('./sdks/${sdkFiles[0]}');
-              // Use the generated SDK methods
-              \`\`\`
-              `;
-              
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: comment
-              });
-            } else {
-              github.rest.issues.createComment({
+              if (sdkFiles.length > 0) {
+                const comment = `🎉 **SDK Generated Successfully!**
+                
+                Generated SDK files:
+                ${sdkFiles.map(file => `- \`sdks/${file}\``).join('\n')}
+                
+                The SDK has been automatically committed to this branch.
+                
+                **Usage Example:**
+                \`\`\`javascript
+                const sdk = require('./sdks/${sdkFiles[0]}');
+                // Use the generated SDK methods
+                \`\`\`
+                `;
+                
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: comment
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: '❌ **SDK Generation Failed**\n\nNo SDK files were generated. Please check the workflow logs for details.'
+                });
+              }
+            } catch (error) {
+              console.error('Error in PR comment step:', error);
+              await github.rest.issues.createComment({
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
