@@ -22,5 +22,17 @@ jobs:
           node-version: '18'
           cache: 'npm'
       
-      - name: Test
-        run: echo "Setup completed!"
+      - name: Install dependencies
+        run: |
+          npm init -y 2>/dev/null || true
+          npm install axios dotenv
+      
+      - name: Create sdks directory
+        run: |
+          mkdir -p sdks
+          mkdir -p scripts
+      
+      - name: Test directories
+        run: |
+          echo "Directories created successfully!"
+          ls -la
