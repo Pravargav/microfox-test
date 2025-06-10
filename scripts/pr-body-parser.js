@@ -1,13 +1,12 @@
 #!/usr/bin/env node
-/* eslint-disable @typescript-eslint/no-require-imports */
 
 /**
  * PR Body Parser Script
  * This script extracts and prints the pull request body and metadata
  */
 
-const fs = require('fs');
-const path = require('path');
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
 
 function main() {
     console.log('🚀 PR Body Parser Script Started');
@@ -42,9 +41,9 @@ function main() {
     console.log('=====================');
     
     // Optional: Save PR body to a file for other scripts to use
-    const outputDir = path.join(process.cwd(), 'temp');
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
+    const outputDir = join(process.cwd(), 'temp');
+    if (!existsSync(outputDir)) {
+        mkdirSync(outputDir, { recursive: true });
     }
     
     const prData = {
@@ -55,8 +54,8 @@ function main() {
         timestamp: new Date().toISOString()
     };
     
-    const outputFile = path.join(outputDir, 'pr-data.json');
-    fs.writeFileSync(outputFile, JSON.stringify(prData, null, 2));
+    const outputFile = join(outputDir, 'pr-data.json');
+    writeFileSync(outputFile, JSON.stringify(prData, null, 2));
     console.log(`💾 PR data saved to: ${outputFile}`);
     
     // Extract checklist items if present
@@ -136,4 +135,4 @@ if (require.main === module) {
     main();
 }
 
-module.exports = { main, formatPRBody, extractChecklist, extractIssueReferences };
+export default { main, formatPRBody, extractChecklist, extractIssueReferences };
