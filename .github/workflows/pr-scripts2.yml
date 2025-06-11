@@ -31,21 +31,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_AUTHOR: ${{ github.event.pull_request.user.login }}
-      - name: Run all scripts in scripts folder
-        run: |
-          for script in scripts/*.mjs; do
-            if [ -f "$script" ]; then
-              echo "Running $script..."
-              node "$script"
-              echo "Completed $script"
-              echo "---"
-            fi
-          done
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
