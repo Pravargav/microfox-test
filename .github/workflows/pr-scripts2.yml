@@ -1,4 +1,4 @@
-name: Run Scripts on Pull Request
+name: Run 2 Scripts on Pull Request
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
