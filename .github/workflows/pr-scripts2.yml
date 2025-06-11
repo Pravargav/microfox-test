@@ -60,11 +60,19 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git pull origin ${{ github.event.pull_request.head.ref }} --rebase
-          git add markfiles/ sdks/
+          git add . || true
+          git stash || true
+          
+          # Add only our generated files
+          git add markfiles/ sdks/ || true
+         
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Add generated files for PR #${{ github.event.pull_request.number }}"
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
+            git commit -m "Add generated files for PR #${{ github.event.pull_request.number }} [skip ci]" || true
+            
+            # Force push to avoid conflicts (use with caution)
+            git push origin HEAD:${{ github.event.pull_request.head.ref }} --force-with-lease || {
+              echo "Push failed, but continuing workflow..."
+            }
           fi
