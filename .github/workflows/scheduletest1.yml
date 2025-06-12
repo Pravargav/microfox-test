@@ -2,10 +2,33 @@ name: Scheduled Workflow
 
 on:
   schedule:
-    # Runs every 2 minutes
-    - cron: '*/2 * * * *'
-  # Optional: Allow manual trigger
+    # Runs every 5 minutes (more reliable than 2 min)
+    - cron: '*/5 * * * *'
+  # Allow manual trigger with inputs
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run against'
+        required: true
+        default: 'development'
+        type: choice
+        options:
+        - development
+        - staging
+        - production
+      debug:
+        description: 'Enable debug mode'
+        required: false
+        default: false
+        type: boolean
+      message:
+        description: 'Custom message'
+        required: false
+        default: 'Manual trigger'
+        type: string
+  # Also trigger on push for testing
+  push:
+    branches: [ main, master ]
 
 jobs:
   scheduled-job:
@@ -15,8 +38,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Run scheduled task
+    - name: Run manual task
       run: |
-        echo "Workflow triggered at: $(date)"
-        # Add your custom commands here
-        echo "Running scheduled task..."
+        echo "Workflow triggered manually at: $(date)"
+        echo "Environment: ${{ github.event.inputs.environment }}"
+        echo "Debug mode: ${{ github.event.inputs.debug }}"
+        echo "Message: ${{ github.event.inputs.message }}"
+        
+        if [ "${{ github.event.inputs.debug }}" == "true" ]; then
+          echo "Debug mode enabled - showing more details"
+          env
+        fi
+        
+        # Add your custom commands here based on inputs
+        echo "Running task for ${{ github.event.inputs.environment }} environment..."
