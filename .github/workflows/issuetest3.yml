@@ -2,7 +2,7 @@
 name: Stale Issues
 on:
   schedule:
-    - cron: '0 0 * * *' # Run daily at midnight
+    - cron: '*/5 * * * *' # Run daily at midnight
   workflow_dispatch: # Allow manual trigger
 
 jobs:
