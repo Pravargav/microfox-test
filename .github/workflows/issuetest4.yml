@@ -1,0 +1,75 @@
+# Workflow 4: Issue metrics and reporting
+name: Issue Metrics
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Run every Monday at 9 AM
+  workflow_dispatch:
+
+jobs:
+  generate-metrics:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Generate weekly issue report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const oneWeekAgo = new Date();
+            oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+            
+            // Get issues created in the last week
+            const { data: newIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: oneWeekAgo.toISOString(),
+              per_page: 100
+            });
+            
+            // Get closed issues in the last week
+            const { data: closedIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'closed',
+              since: oneWeekAgo.toISOString(),
+              per_page: 100
+            });
+            
+            // Get open issues
+            const { data: openIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            
+            const report = `# Weekly Issue Report 📊
+            
+            **Week of ${oneWeekAgo.toDateString()} - ${new Date().toDateString()}**
+            
+            ## Summary
+            - 🆕 New issues: ${newIssues.length}
+            - ✅ Closed issues: ${closedIssues.filter(issue => new Date(issue.closed_at) >= oneWeekAgo).length}
+            - 📖 Open issues: ${openIssues.length}
+            
+            ## New Issues This Week
+            ${newIssues.map(issue => `- [#${issue.number}](${issue.html_url}) ${issue.title}`).join('\n')}
+            
+            ## Recently Closed Issues
+            ${closedIssues.filter(issue => new Date(issue.closed_at) >= oneWeekAgo)
+              .map(issue => `- [#${issue.number}](${issue.html_url}) ${issue.title}`).join('\n')}
+            
+            ---
+            *This report was generated automatically by GitHub Actions*`;
+            
+            // Create an issue with the report
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Weekly Issue Report - ${new Date().toDateString()}`,
+              body: report,
+              labels: ['report', 'automated']
+            });
+
+---
