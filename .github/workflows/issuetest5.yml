@@ -1,0 +1,75 @@
+name: Issue Template Check
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  check-template:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Check if issue follows template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issueBody = context.payload.issue.body || '';
+            const requiredSections = [
+              '## Description',
+              '## Steps to Reproduce',
+              '## Expected Behavior',
+              '## Actual Behavior',
+              '## Environment'
+            ];
+            
+            const missingSections = requiredSections.filter(section => 
+              !issueBody.includes(section)
+            );
+            
+            if (missingSections.length > 0) {
+              const comment = `Hello @${context.payload.issue.user.login}! 👋
+
+              Thank you for opening this issue. However, it appears that your issue is missing some required sections from our issue template:
+
+              **Missing sections:**
+              ${missingSections.map(section => `- ${section}`).join('\n')}
+
+              Please update your issue to include these sections so we can better assist you. You can edit your issue description above.
+
+              **Our issue template includes:**
+              - **Description**: A clear description of the issue
+              - **Steps to Reproduce**: Detailed steps to reproduce the issue
+              - **Expected Behavior**: What you expected to happen
+              - **Actual Behavior**: What actually happened
+              - **Environment**: Your environment details (OS, browser, versions, etc.)
+
+              Thanks for your understanding! 🙏`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['needs-template', 'needs-more-info']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `Thank you for following our issue template! This helps us process your request more efficiently. 🎉`
+              });
+
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: ['template-followed']
+              });
+            }
