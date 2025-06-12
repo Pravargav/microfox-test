@@ -1,0 +1,47 @@
+# Workflow 1: Auto-label issues based on content
+name: Auto Label Issues
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  auto-label:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Label bug reports
+        if: contains(github.event.issue.body, 'bug') || contains(github.event.issue.title, 'bug')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['bug', 'needs-triage']
+            });
+
+      - name: Label feature requests
+        if: contains(github.event.issue.body, 'feature') || contains(github.event.issue.title, 'feature')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['enhancement', 'feature-request']
+            });
+
+      - name: Label documentation issues
+        if: contains(github.event.issue.body, 'documentation') || contains(github.event.issue.title, 'docs')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['documentation']
+            });
