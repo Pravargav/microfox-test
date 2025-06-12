@@ -1,0 +1,22 @@
+name: Scheduled Workflow
+
+on:
+  schedule:
+    # Runs every 2 minutes
+    - cron: '*/2 * * * *'
+  # Optional: Allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Run scheduled task
+      run: |
+        echo "Workflow triggered at: $(date)"
+        # Add your custom commands here
+        echo "Running scheduled task..."
