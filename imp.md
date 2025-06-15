@@ -6,10 +6,10 @@
 
 4) (Production dependencies)
 
-npm install zod
+    npm install zod
 
- (Development dependencies)
-npm install -D @types/node tsup typescript@5.6.3
+   (Development dependencies)
+    npm install -D @types/node tsup typescript@5.6.3
 
 
 5) (Open Git Bash and run:)
