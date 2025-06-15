@@ -9,10 +9,11 @@
     npm install zod
 
    (Development dependencies)
+   
     npm install -D @types/node tsup typescript@5.6.3
 
 
-5) (Open Git Bash and run:)
+6) (Open Git Bash and run:)
 mkdir -p src/{types,schemas}
 touch src/index.ts src/types/index.ts src/schemas/index.ts
 
