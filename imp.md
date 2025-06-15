@@ -2,7 +2,7 @@
 
 2) pnpm install ( create node_modules inside created package) 
 
-3)npm init -y
+3) npm init -y
 
 4) Production dependencies
 npm install zod
