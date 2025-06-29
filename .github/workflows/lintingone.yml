@@ -3,6 +3,8 @@ name: Lint Next.js App
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+  issues:
+    types: [opened]
 
 jobs:
   lint:
